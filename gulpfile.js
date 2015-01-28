@@ -1,11 +1,9 @@
-// TODO minify JS
-// TODO maybe later something about styles
-
 var gulp       = require('gulp');
 var gutil      = require('gulp-util');
+var uglify     = require('gulp-uglify');
 var browserify = require('gulp-browserify');
 var reactify   = require('reactify');
-var literalify = require('literalify');
+var to5ify     = require('6to5ify');
 var rename     = require('gulp-rename');
 var watch      = require('gulp-watch');
 
@@ -14,16 +12,21 @@ gulp.task('js', function() {
              .pipe(browserify({
                debug: true,
                extensions: ['.jsx', '.js', '.json'],
-               transform: [reactify, literalify.configure({
-                 react: 'window.React'
-               })]
+               transform: [to5ify, reactify]
              }))
              .on('error', function(err) {
                gutil.log(err.message)
              })
-             .pipe(rename('client.js'))
+             .pipe(rename('app.js'))
              .pipe(gulp.dest('build'))
 })
+
+gulp.task('build', ['js'], function() {
+  return gulp.src('build/app.js')
+             .pipe(uglify())
+             .pipe(rename('app.min.js'))
+             .pipe(gulp.dest('build'));
+});
 
 gulp.task('watch', function () {
     gulp.watch('js/**',['js']);
